@@ -41,9 +41,9 @@ pipeline {
                     withSonarQubeEnv('sonarqube-server') { // name must match Jenkins > Manage Jenkins > System > SonarQube servers
                         sh """
                             sonar-scanner \
-                              -Dsonar.projectKey=catalogue \
-                              -Dsonar.projectVersion=${APP_VERSION} \
-                              -Dsonar.sources=.
+                              -sonar.projectKey=catalogue \
+                              -sonar.projectVersion=${APP_VERSION} \
+                              -sonar.sources=.
                         """
                     }
                 }
