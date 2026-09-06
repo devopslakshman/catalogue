@@ -24,6 +24,16 @@ pipeline {
             }
         }
 
+        stage('Unit Tests') {
+            steps {
+                script {
+                    sh """
+                        npm test
+                    """
+                }
+            }
+        }
+
         stage('Docker Image Build') {
             steps {
                 script {
