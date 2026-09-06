@@ -36,20 +36,15 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def scannerHome = tool 'sonarqube-server'   // name configured under Manage Jenkins > Tools > SonarQube Scanner installations
-                    withSonarQubeEnv('sonarqube-server') {       // name configured under Manage Jenkins > System > SonarQube servers
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                              -Dsonar.projectKey=catalogue \
-                              -Dsonar.projectVersion=${APP_VERSION} \
-                              -Dsonar.sources=.
-                        """
-                    }
-                }
+    steps {
+        script {
+            def scannerHome = tool 'sonarqube-server'
+            withSonarQubeEnv('sonarqube-server') {
+                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=catalogue -Dsonar.projectVersion=${APP_VERSION} -Dsonar.sources=."
             }
         }
+    }
+}
         stage('Quality Gate') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
