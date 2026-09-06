@@ -36,16 +36,20 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('sonarqube-server') { // name must match Jenkins > Manage Jenkins > System > SonarQube servers
-                        sh """
-                            sonar-scanner \
-                              -sonar.projectKey=catalogue \
-                              -sonar.projectVersion=${APP_VERSION} \
-                              -sonar.sources=.
-                        """
-                    }
+    steps {
+        script {
+            def scannerHome = tool 'sonarqube-server'
+            withSonarQubeEnv('sonarqube-server') {
+                sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                      -Dsonar.projectKey=catalogue \
+                      -Dsonar.projectVersion=${APP_VERSION} \
+                      -Dsonar.sources=.
+                """
+            }
+        }
+    }
+}
                 }
             }
         }
