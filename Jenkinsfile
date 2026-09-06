@@ -1,7 +1,11 @@
 pipeline {
     agent any
     environment {
-        IMAGE_NAME = 'catalogue'
+        IMAGE_NAME     = 'catalogue'
+        ECR_REPO_NAME  = 'roboshop/catalogue'
+        AWS_ACCOUNT_ID = '484056256762'
+        AWS_REGION     = 'us-east-1'             // update if your ECR repo is in a different region
+        ECR_REGISTRY   = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     }
     stages {
         stage('Read Version') {
@@ -39,6 +43,18 @@ pipeline {
                 script {
                     sh """
                         docker build -t ${IMAGE_NAME}:${APP_VERSION} .
+                    """
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                script {
+                    sh """
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                        docker tag ${IMAGE_NAME}:${APP_VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${APP_VERSION}
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${APP_VERSION}
                     """
                 }
             }
