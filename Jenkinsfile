@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        npm test
+                        CATALOGUE_SERVER_PORT=9090 npm test
                     """
                 }
             }
