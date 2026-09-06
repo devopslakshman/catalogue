@@ -17,7 +17,6 @@ pipeline {
                 }
             }
         }
-
         stage('Install Dependencies') {
             steps {
                 script {
@@ -27,7 +26,6 @@ pipeline {
                 }
             }
         }
-
         stage('Unit Tests') {
             steps {
                 script {
@@ -37,7 +35,27 @@ pipeline {
                 }
             }
         }
-
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv('sonarqube-server') { // name must match Jenkins > Manage Jenkins > System > SonarQube servers
+                        sh """
+                            sonar-scanner \
+                              -Dsonar.projectKey=catalogue \
+                              -Dsonar.projectVersion=${APP_VERSION} \
+                              -Dsonar.sources=.
+                        """
+                    }
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
         stage('Docker Image Build') {
             steps {
                 script {
@@ -47,7 +65,6 @@ pipeline {
                 }
             }
         }
-
         stage('Push to ECR') {
             steps {
                 script {
