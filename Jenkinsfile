@@ -38,13 +38,13 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'sonarqube-server'   // name configured under Manage Jenkins > Tools > SonarQube Scanner installations
+                    def scannerHome = tool 'sonar-scanner-cli'   // name configured under Manage Jenkins > Tools > SonarQube Scanner installations
                     withSonarQubeEnv('sonarqube-server') {       // name configured under Manage Jenkins > System > SonarQube servers
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
-                              -sonar.projectKey=catalogue \
-                              -sonar.projectVersion=${APP_VERSION} \
-                              -sonar.sources=.
+                              -Dsonar.projectKey=catalogue \
+                              -Dsonar.projectVersion=${APP_VERSION} \
+                              -Dsonar.sources=.
                         """
                     }
                 }
