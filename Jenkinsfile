@@ -36,15 +36,15 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
-    steps {
-        script {
-            def scannerHome = tool 'sonarqube-server'
-            withSonarQubeEnv('sonarqube-server') {
-                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=catalogue -Dsonar.projectVersion=${APP_VERSION} -Dsonar.sources=."
+            steps {
+                script {
+                    def scannerHome = tool 'sonarqube-server'
+                    withSonarQubeEnv('sonarqube-server') {
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=catalogue -Dsonar.projectVersion=${APP_VERSION} -Dsonar.sources=."
+                    }
+                }
             }
         }
-    }
-}
         stage('Quality Gate') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
@@ -58,6 +58,26 @@ pipeline {
                     sh """
                         docker build -t ${IMAGE_NAME}:${APP_VERSION} .
                     """
+                }
+            }
+        }
+        stage('Trivy Image Scan') {
+            steps {
+                script {
+                    sh """
+                        trivy image \
+                            --severity HIGH,CRITICAL \
+                            --exit-code 1 \
+                            --format table \
+                            --scanners vuln \
+                            -o trivy-report.txt \
+                            ${IMAGE_NAME}:${APP_VERSION}
+                    """
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true
                 }
             }
         }
